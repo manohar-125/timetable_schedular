@@ -1,0 +1,34 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+venv/
+.env/
+.env.*
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+*.log
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+tmp/
+temp/
+*.tmp
+
+*.pid
+
+build/
+dist/
+*.egg-info/
+
+.ipynb_checkpoints/
+
+# Research and report folders
+/Report/
+/Research Papers/

@@ -1,0 +1,795 @@
+{
+  "cycle": "even",
+  "activeSemester": "IMTech-IV",
+  "semesterData": {
+    "MCA-I": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 1,
+          "name": "C",
+          "faculty": "NN",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 2,
+          "name": "OTSC",
+          "faculty": "RPL",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 3,
+          "name": "TFCS",
+          "faculty": "SR",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 4,
+          "name": "COA",
+          "faculty": "RR",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 5,
+          "name": "DBMS",
+          "faculty": "SAM",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 6,
+          "name": "CSWT",
+          "faculty": "ASK",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "labs": [
+        {
+          "id": 7,
+          "name": "DBMS Lab",
+          "faculty": "SAM",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 8,
+          "name": "C Lab",
+          "faculty": "NN",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    },
+    "MCA-III": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 9,
+          "name": "Algo",
+          "faculty": "SBR",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 10,
+          "name": "CN",
+          "faculty": "AP",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 11,
+          "name": "SE",
+          "faculty": "SAM",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 12,
+          "name": "OS",
+          "faculty": "VN",
+          "credits": 4,
+          "recourse": false
+        }
+      ],
+      "labs": [
+        {
+          "id": 14,
+          "name": "Python Lab",
+          "faculty": "SBR",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 15,
+          "name": "SE Lab",
+          "faculty": "SAM",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": [
+        {
+          "id": 16,
+          "name": "AGA",
+          "faculty": "AKD",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 17,
+          "name": "PR",
+          "faculty": "AG",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 18,
+          "name": "PC",
+          "faculty": "RV",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 19,
+          "name": "PDS",
+          "faculty": "NSR",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 20,
+          "name": "PSM",
+          "faculty": "AN",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 21,
+          "name": "ACA",
+          "faculty": "NRR",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 22,
+          "name": "DC",
+          "faculty": "SR",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 23,
+          "name": "CC",
+          "faculty": "MSR",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 24,
+          "name": "ML",
+          "faculty": "LN",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 25,
+          "name": "DL",
+          "faculty": "LBSR",
+          "credits": 4,
+          "recourse": false
+        }
+      ]
+    },
+    "MTech-I": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 1,
+          "name": "Java",
+          "faculty": "ASK",
+          "credits": 4,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 2,
+          "name": "DS",
+          "faculty": "AKD",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 3,
+          "name": "Algo",
+          "faculty": "VN",
+          "credits": 4,
+          "recourse": false,
+          "bucket": null
+        }
+      ],
+      "labs": [
+        {
+          "id": 4,
+          "name": "Java Lab",
+          "faculty": "ASK",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 5,
+          "name": "DS Lab",
+          "faculty": "AKD",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-I": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 8,
+          "name": "English",
+          "faculty": "ABC",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 9,
+          "name": "EM-I",
+          "faculty": "DEF",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 10,
+          "name": "EP-I",
+          "faculty": "GHI",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 11,
+          "name": "PSP",
+          "faculty": "WN",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 12,
+          "name": "PES",
+          "faculty": "DB",
+          "credits": 4,
+          "recourse": true,
+          "bucket": null
+        }
+      ],
+      "labs": [
+        {
+          "id": 13,
+          "name": "PSP Lab",
+          "faculty": "WN",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 14,
+          "name": "BEL-1",
+          "faculty": "DB",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-III": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 15,
+          "name": "IPH",
+          "faculty": "ABCA",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 16,
+          "name": "IT",
+          "faculty": "RPL",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 17,
+          "name": "EDC",
+          "faculty": "AS",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 18,
+          "name": "OOP",
+          "faculty": "SKU",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 19,
+          "name": "SD",
+          "faculty": "AN",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 21,
+          "name": "COA",
+          "faculty": "RR",
+          "credits": 4,
+          "recourse": true,
+          "bucket": null
+        }
+      ],
+      "labs": [
+        {
+          "id": 20,
+          "name": "OOP Lab",
+          "faculty": "SKU",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 22,
+          "name": "EDC Lab",
+          "faculty": "AS",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-V": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 23,
+          "name": "AFM",
+          "faculty": "ABCC",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 24,
+          "name": "OS",
+          "faculty": "SR",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 25,
+          "name": "CN",
+          "faculty": "AP",
+          "credits": 4,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 26,
+          "name": "Algorithms",
+          "faculty": "NN",
+          "credits": 4,
+          "recourse": true,
+          "bucket": null
+        }
+      ],
+      "labs": [
+        {
+          "id": 27,
+          "name": "OS Lab",
+          "faculty": "SR",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        },
+        {
+          "id": 28,
+          "name": "CN Lab",
+          "faculty": "AP",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-VII": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 29,
+          "name": "ML",
+          "faculty": "MS",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 30,
+          "name": "SPM",
+          "faculty": "ASK",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        },
+        {
+          "id": 31,
+          "name": "CS",
+          "faculty": "AKD",
+          "credits": 3,
+          "recourse": true,
+          "bucket": null
+        }
+      ],
+      "labs": [
+        {
+          "id": 32,
+          "name": "ML Lab",
+          "faculty": "MS",
+          "credits": 3,
+          "recourse": false,
+          "bucket": null
+        }
+      ],
+      "electives": []
+    },
+    "MCA-II": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 1,
+          "name": "C",
+          "faculty": "NN",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 2,
+          "name": "OTSC",
+          "faculty": "RPL",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 3,
+          "name": "TFCS",
+          "faculty": "SR",
+          "credits": 4,
+          "recourse": false
+        },
+        {
+          "id": 4,
+          "name": "COA",
+          "faculty": "RR",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 5,
+          "name": "DBMS",
+          "faculty": "SAM",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 6,
+          "name": "CSWT",
+          "faculty": "ASK",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "labs": [
+        {
+          "id": 7,
+          "name": "DBMS Lab",
+          "faculty": "SAM",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 8,
+          "name": "C Lab",
+          "faculty": "NN",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    },
+    "MTech-II": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 9,
+          "name": "Java",
+          "faculty": "ASK",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 10,
+          "name": "DS",
+          "faculty": "AKD",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 11,
+          "name": "Algo",
+          "faculty": "VN",
+          "credits": 4,
+          "recourse": true
+        }
+      ],
+      "labs": [
+        {
+          "id": 12,
+          "name": "Java Lab",
+          "faculty": "ASK",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 13,
+          "name": "DS Lab",
+          "faculty": "AKD",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-II": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 14,
+          "name": "English",
+          "faculty": "ABC",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 15,
+          "name": "EM-I",
+          "faculty": "DEF",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 16,
+          "name": "EP-I",
+          "faculty": "GHI",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 17,
+          "name": "PSP",
+          "faculty": "WN",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 18,
+          "name": "PES",
+          "faculty": "DB",
+          "credits": 4,
+          "recourse": true
+        }
+      ],
+      "labs": [
+        {
+          "id": 19,
+          "name": "PSP Lab",
+          "faculty": "WN",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 20,
+          "name": "BEN-I",
+          "faculty": "DB",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-IV": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 21,
+          "name": "IPH",
+          "faculty": "ABCA",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 22,
+          "name": "IT",
+          "faculty": "RPL",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 23,
+          "name": "EDC",
+          "faculty": "AS",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 24,
+          "name": "OOP",
+          "faculty": "SKU",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 25,
+          "name": "SD",
+          "faculty": "AN",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 26,
+          "name": "COA",
+          "faculty": "RR",
+          "credits": 4,
+          "recourse": true
+        }
+      ],
+      "labs": [
+        {
+          "id": 27,
+          "name": "OOP Lab",
+          "faculty": "SKU",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 28,
+          "name": "EDC Lab",
+          "faculty": "AS",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-VI": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 29,
+          "name": "AFM",
+          "faculty": "ABCC",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 30,
+          "name": "OS",
+          "faculty": "SR",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 31,
+          "name": "CN",
+          "faculty": "AP",
+          "credits": 4,
+          "recourse": true
+        },
+        {
+          "id": 32,
+          "name": "Algorithms",
+          "faculty": "NN",
+          "credits": 4,
+          "recourse": true
+        }
+      ],
+      "labs": [
+        {
+          "id": 33,
+          "name": "OS Lab",
+          "faculty": "SR",
+          "credits": 3,
+          "recourse": false
+        },
+        {
+          "id": 34,
+          "name": "CN Lab",
+          "faculty": "AP",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    },
+    "IMTech-VIII": {
+      "include": true,
+      "coreSubjects": [
+        {
+          "id": 35,
+          "name": "ML",
+          "faculty": "MS",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 36,
+          "name": "SPM",
+          "faculty": "ASK",
+          "credits": 3,
+          "recourse": true
+        },
+        {
+          "id": 37,
+          "name": "CS",
+          "faculty": "AKD",
+          "credits": 3,
+          "recourse": true
+        }
+      ],
+      "labs": [
+        {
+          "id": 38,
+          "name": "ML Lab",
+          "faculty": "MS",
+          "credits": 3,
+          "recourse": false
+        }
+      ],
+      "electives": []
+    }
+  },
+  "teacherAvailability": {
+    "teachers": {
+      "ap": {
+        "key": "ap",
+        "name": "AP",
+        "slots": {}
+      }
+    }
+  },
+  "_rowId": 40
+}

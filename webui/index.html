@@ -1,0 +1,3045 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>University Timetable Scheduler</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --panel: #f9fafb;
+        --focus: #2563eb;
+        --danger: #991b1b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+        font-size: 14px;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.35;
+      }
+
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 12px 14px;
+      }
+
+      header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      header h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+      }
+      header .sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .row > * {
+        min-height: 28px;
+      }
+
+      .section {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .section:last-child {
+        border-bottom: none;
+      }
+
+      .label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      input[type="text"],
+      select {
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 5px 8px;
+        font: inherit;
+        background: #fff;
+      }
+      input[type="text"]:focus,
+      select:focus,
+      button:focus {
+        outline: 2px solid rgba(37, 99, 235, 0.25);
+        outline-offset: 1px;
+        border-color: var(--focus);
+      }
+
+      button {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--panel);
+      }
+      button.danger {
+        color: var(--danger);
+        border-color: #fecaca;
+        background: #fff;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 10px 0 0;
+      }
+      .tab {
+        padding: 6px 10px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+      }
+      .tab[aria-selected="true"] {
+        border-color: var(--focus);
+        background: var(--panel);
+      }
+
+      .panel {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .panel h2 {
+        font-size: 14px;
+        margin: 0 0 8px;
+        font-weight: 600;
+      }
+
+      .mini {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 6px;
+        vertical-align: top;
+      }
+      th {
+        font-size: 12px;
+        text-align: left;
+        background: var(--panel);
+        font-weight: 600;
+      }
+
+      /* Timetable cell styling - clean university style */
+      .entry {
+        padding: 4px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+
+      /* Occupied slots - course info */
+      .entry.core,
+      .entry.lab {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+      }
+
+      /* Elective-available slots - visual indicator only, no text */
+      .entry.elective-available {
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        min-height: 24px;
+      }
+
+      /* Recourse-blocked slots - subtle gray */
+      .entry.recourse-blocked {
+        background-color: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        min-height: 24px;
+      }
+
+      /* Empty unusable slots */
+      .entry.empty {
+        background-color: #ffffff;
+        min-height: 24px;
+      }
+
+      td input[type="text"],
+      td select {
+        width: 100%;
+      }
+      td .inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .table-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin: 6px 0 0;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 12px;
+      }
+      .chip button {
+        padding: 0 6px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #fff;
+        line-height: 18px;
+      }
+
+      .teacher-list {
+        margin-top: 8px;
+        display: grid;
+        gap: 8px;
+      }
+      .teacher {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px;
+        background: #fff;
+      }
+      .teacher .name {
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .matrix-wrap {
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        margin-top: 8px;
+      }
+      .matrix {
+        border-collapse: collapse;
+        width: max-content;
+        min-width: 100%;
+      }
+      .matrix th {
+        position: sticky;
+        top: 0;
+        background: var(--panel);
+        z-index: 1;
+      }
+      .matrix th.left {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+      }
+      .matrix td,
+      .matrix th {
+        white-space: nowrap;
+      }
+      .matrix td {
+        text-align: center;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 12px;
+        margin-top: 6px;
+      }
+
+      /* Right-side compact debug / test panel */
+      .right-panel {
+        position: fixed;
+        right: 12px;
+        top: 80px;
+        width: 280px;
+        max-height: 70vh;
+        overflow: auto;
+        border: 1px solid var(--border);
+        background: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+        z-index: 1200;
+        transition: opacity 0.2s, visibility 0.2s;
+      }
+      .right-panel.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #showConfigBtn {
+        position: fixed;
+        right: 12px;
+        top: 80px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 1100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+        transition: opacity 0.2s, transform 0.2s;
+      }
+      #showConfigBtn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+      }
+      #showConfigBtn.visible {
+        display: flex;
+      }
+      .right-panel h3 {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+      }
+      .right-panel .mini {
+        margin-bottom: 8px;
+      }
+      /* Loading overlay */
+      #loaderOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+      #loaderOverlay.hidden {
+        display: none !important;
+      }
+      #loaderBox {
+        background: #fff;
+        padding: 18px 22px;
+        border-radius: 8px;
+        box-shadow: 0 8px 30px rgba(2, 6, 23, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 260px;
+      }
+      .spinner {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 4px solid #e6e6e6;
+        border-top-color: var(--focus);
+        animation: spin 1s linear infinite;
+        flex: 0 0 auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #loaderText {
+        font-weight: 600;
+      }
+      #loaderStage {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>University Timetable Scheduler</h1>
+          <div class="sub">Configure semesters and teacher unavailability.</div>
+        </div>
+      </header>
+
+      <main>
+        <div class="section" id="cycleSection">
+          <div class="row">
+            <div class="label">Semester cycle</div>
+            <label class="row" style="gap: 6px">
+              <input type="radio" name="cycle" value="odd" checked />
+              <span>Odd</span>
+            </label>
+            <label class="row" style="gap: 6px">
+              <input type="radio" name="cycle" value="even" />
+              <span>Even</span>
+            </label>
+          </div>
+
+          <div
+            class="tabs"
+            id="semesterTabs"
+            role="tablist"
+            aria-label="Semester tabs"
+          ></div>
+          <div class="panel" id="semesterPanel" aria-live="polite"></div>
+        </div>
+
+        <div class="section hidden" id="configSection">
+          <div style="font-weight: 600">Configuration Management</div>
+          <div class="mini">Save, load, and manage test configurations.</div>
+          <div class="row" style="flex-wrap: wrap; gap: 8px; margin-top: 8px">
+            <button type="button" id="saveConfigBtn">Save Configuration</button>
+            <button type="button" id="loadConfigBtn">Load Configuration</button>
+            <button type="button" id="resetAllBtn">Reset All</button>
+            <button type="button" id="showDebugBtn">Show Debug Panel</button>
+          </div>
+          <input
+            type="file"
+            id="configFileInput"
+            style="display: none"
+            accept=".json"
+          />
+        </div>
+
+        <div class="section hidden" id="testCasesSection">
+          <div style="font-weight: 600">Sample Test Cases</div>
+          <div class="mini">Load pre-built configurations instantly.</div>
+          <div class="row" style="flex-wrap: wrap; gap: 6px; margin-top: 8px">
+            <button type="button" class="tab" data-test-case="basicMCA">
+              MCA Basic
+            </button>
+            <button type="button" class="tab" data-test-case="withLabs">
+              MCA + Labs
+            </button>
+            <button type="button" class="tab" data-test-case="teacherClash">
+              Teacher Clash
+            </button>
+            <button type="button" class="tab" data-test-case="recourseClash">
+              Recourse Clash
+            </button>
+            <button type="button" class="tab" data-test-case="denseTimetable">
+              Dense Timetable
+            </button>
+            <button type="button" class="tab" data-test-case="minimal">
+              Minimal
+            </button>
+            <button type="button" class="tab" data-test-case="realDataset">
+              Real MCA Dataset
+            </button>
+          </div>
+        </div>
+
+        <!-- Paste JSON Configuration removed: keep save/load and samples only -->
+
+        <div class="section hidden" id="debugSection">
+          <div style="font-weight: 600">Debug Panel</div>
+          <button type="button" id="hideDebugBtn" style="float: right">
+            Hide
+          </button>
+          <div style="clear: both"></div>
+          <div
+            id="debugContent"
+            style="
+              margin-top: 8px;
+              border: 1px solid var(--border);
+              border-radius: 4px;
+              padding: 10px;
+              background: var(--panel);
+              overflow: auto;
+              max-height: 400px;
+              font-size: 11px;
+              font-family: monospace;
+              white-space: pre-wrap;
+              word-break: break-all;
+            "
+          ></div>
+          <div class="table-actions" style="margin-top: 6px">
+            <button type="button" id="exportTimetableBtn">
+              Export Timetable JSON
+            </button>
+            <button type="button" id="exportConfigBtn">
+              Export Full Config JSON
+            </button>
+          </div>
+        </div>
+
+        <div class="section" id="teacherSection">
+          <div class="row" style="justify-content: space-between">
+            <div>
+              <div style="font-weight: 600">Teacher availability</div>
+              <div class="mini">Enter unavailable slots as chips.</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="row">
+              <div>
+                <div class="label">Teacher</div>
+                <input
+                  type="text"
+                  id="teacherName"
+                  placeholder="e.g., Dr. Rao"
+                  style="min-width: 220px"
+                />
+              </div>
+              <div>
+                <div class="label">Day</div>
+                <select id="daySelect">
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                </select>
+              </div>
+              <div>
+                <div class="label">Time slot</div>
+                <select id="slotSelect"></select>
+              </div>
+              <div style="align-self: end">
+                <button type="button" id="addUnavailable">Add</button>
+              </div>
+            </div>
+            <div class="error hidden" id="teacherError"></div>
+            <div class="teacher-list" id="teacherList"></div>
+          </div>
+        </div>
+
+        <!-- Elective compatibility matrix removed (electives disabled) -->
+
+        <div class="section" id="generateSection">
+          <div class="row" style="justify-content: space-between">
+            <div>
+              <div style="font-weight: 600">Generate timetable</div>
+              <div class="mini">
+                Uses only semesters checked for inclusion in the selected cycle.
+              </div>
+            </div>
+            <button type="button" id="generateBtn">Generate Timetable</button>
+          </div>
+          <div class="error hidden" id="generateError"></div>
+          <div class="panel hidden" id="resultsPanel">
+            <h2>Results</h2>
+            <div class="mini">Combined timetable (Mon–Fri, P1–P8).</div>
+            <div
+              class="table-actions"
+              style="margin-top: 8px; margin-bottom: 12px"
+            >
+              <button type="button" id="exportPdfBtn">📥 Export PDF</button>
+              <button type="button" id="exportCsvBtn">📥 Export CSV</button>
+            </div>
+            <div id="semesterResults"></div>
+            <div
+              id="debugInfo"
+              style="margin-top: 12px; font-size: 12px; color: var(--muted)"
+            ></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Right-side temporary test panel (compact, removable) -->
+    <div class="right-panel" id="rightPanel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
+        <h3 style="margin: 0">Test / Config Panel</h3>
+        <button type="button" id="toggleConfigPanelBtn" style="background: none; border: none; font-size: 18px; cursor: pointer; padding: 0; color: #666; hover-color: #333" title="Hide config panel">✕</button>
+      </div>
+      <div class="mini">Quickly load built-in datasets and config tools.</div>
+
+      <div style="margin-bottom: 8px">
+        <div class="label">Dataset</div>
+        <select
+          id="datasetSelector"
+          style="width: 100%; margin-top: 6px"
+        ></select>
+      </div>
+      <div class="row" style="margin-bottom: 8px">
+        <button type="button" id="loadDatasetBtn">Load Dataset</button>
+        <button type="button" id="resetRight" class="danger">Reset</button>
+      </div>
+
+      <div
+        style="
+          margin-top: 8px;
+          border-top: 1px solid var(--border);
+          padding-top: 8px;
+        "
+      >
+        <div class="label">Config</div>
+        <div class="mini" style="margin-bottom: 6px">
+          Save / load current UI configuration.
+        </div>
+        <div class="row" style="margin-top: 6px; gap: 6px">
+          <button type="button" id="saveConfigRight">Save</button>
+          <button type="button" id="loadConfigRight">Load</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Show config panel button (appears when panel is hidden) -->
+    <button type="button" id="showConfigBtn" title="Show config panel">⚙</button>
+
+    <!-- Loading overlay shown during timetable generation -->
+    <div id="loaderOverlay" class="hidden" aria-hidden="true">
+      <div id="loaderBox">
+        <div class="spinner" aria-hidden="true"></div>
+        <div style="display: flex; flex-direction: column">
+          <div id="loaderText">Generating timetable...</div>
+          <div id="loaderStage" class="mini"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+
+      // ---- Configuration ----
+      const ODD_SEMESTERS = [
+        "MCA-I",
+        "MCA-III",
+        "MTech-I",
+        "IMTech-I",
+        "IMTech-III",
+        "IMTech-V",
+        "IMTech-VII",
+      ];
+
+      const EVEN_SEMESTERS = [
+        "MCA-II",
+        "MTech-II",
+        "IMTech-II",
+        "IMTech-IV",
+        "IMTech-VI",
+        "IMTech-VIII",
+      ];
+
+      const SLOT_OPTIONS = [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "First Half",
+        "Second Half",
+        "Full Day",
+      ];
+
+      // ---- State ----
+      const appState = {
+        cycle: "odd",
+        activeSemester: null,
+        semesterData: {},
+        teacherAvailability: {
+          // nameKey -> { name: 'Dr. Rao', slots: Set(['Monday|P1', ...]) }
+          teachers: {},
+        },
+        _rowId: 1,
+      };
+
+      // ---- DOM ----
+      const elTabs = document.getElementById("semesterTabs");
+      const elPanel = document.getElementById("semesterPanel");
+      const elSlotSelect = document.getElementById("slotSelect");
+      const elTeacherName = document.getElementById("teacherName");
+      const elDaySelect = document.getElementById("daySelect");
+      const elAddUnavailable = document.getElementById("addUnavailable");
+      const elTeacherList = document.getElementById("teacherList");
+      const elTeacherError = document.getElementById("teacherError");
+      const elGenerateBtn = document.getElementById("generateBtn");
+      const elGenerateError = document.getElementById("generateError");
+      const elResultsPanel = document.getElementById("resultsPanel");
+      const elSemesterResults = document.getElementById("semesterResults");
+      const elLoaderOverlay = document.getElementById("loaderOverlay");
+      const elLoaderText = document.getElementById("loaderText");
+      const elLoaderStage = document.getElementById("loaderStage");
+      let generationInProgress = false;
+      // (Elective UI elements removed)
+
+      // ---- Helpers ----
+      function normalizeKey(value) {
+        return String(value || "")
+          .trim()
+          .replace(/\s+/g, " ")
+          .toLowerCase();
+      }
+
+      function cleanLabel(value) {
+        return String(value || "")
+          .trim()
+          .replace(/\s+/g, " ");
+      }
+
+      function nextRowId() {
+        const id = appState._rowId;
+        appState._rowId += 1;
+        return id;
+      }
+
+      function ensureSemester(semesterName) {
+        if (!appState.semesterData[semesterName]) {
+          appState.semesterData[semesterName] = {
+            include: true,
+            coreSubjects: [],
+            labs: [],
+          };
+        }
+        return appState.semesterData[semesterName];
+      }
+
+      function currentSemestersForCycle(cycle) {
+        return cycle === "even" ? EVEN_SEMESTERS : ODD_SEMESTERS;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function showTeacherError(message) {
+        elTeacherError.textContent = message;
+        elTeacherError.classList.remove("hidden");
+      }
+
+      function clearTeacherError() {
+        elTeacherError.textContent = "";
+        elTeacherError.classList.add("hidden");
+      }
+
+      function showGenerateError(message) {
+        elGenerateError.textContent = message;
+        elGenerateError.classList.remove("hidden");
+      }
+
+      function clearGenerateError() {
+        elGenerateError.textContent = "";
+        elGenerateError.classList.add("hidden");
+      }
+
+      function showLoader(message, stage) {
+        if (elLoaderOverlay) {
+          if (message) elLoaderText.textContent = message;
+          if (stage) elLoaderStage.textContent = stage;
+          else elLoaderStage.textContent = "";
+          elLoaderOverlay.classList.remove("hidden");
+          elLoaderOverlay.setAttribute("aria-hidden", "false");
+        }
+      }
+
+      function hideLoader() {
+        if (elLoaderOverlay) {
+          elLoaderOverlay.classList.add("hidden");
+          elLoaderOverlay.setAttribute("aria-hidden", "true");
+          elLoaderStage.textContent = "";
+        }
+      }
+
+      // Elective keys and matrix functionality removed in simplified UI.
+
+      // ---- Render: Cycle + Tabs ----
+      function renderTabs() {
+        const semesters = currentSemestersForCycle(appState.cycle);
+
+        // Ensure state objects exist for visible tabs
+        semesters.forEach(ensureSemester);
+
+        if (
+          !appState.activeSemester ||
+          !semesters.includes(appState.activeSemester)
+        ) {
+          appState.activeSemester = semesters[0] || null;
+        }
+
+        elTabs.innerHTML = "";
+        for (const sem of semesters) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "tab";
+          btn.role = "tab";
+          btn.dataset.semester = sem;
+          btn.setAttribute(
+            "aria-selected",
+            sem === appState.activeSemester ? "true" : "false",
+          );
+          btn.textContent = sem;
+          btn.addEventListener("click", () => {
+            appState.activeSemester = sem;
+            renderTabs();
+            renderActiveSemesterPanel();
+          });
+          elTabs.appendChild(btn);
+        }
+      }
+
+      // ---- Render: Semester Panel ----
+      function renderActiveSemesterPanel() {
+        const sem = appState.activeSemester;
+        if (!sem) {
+          elPanel.innerHTML = '<div class="mini">Select a semester.</div>';
+          return;
+        }
+        const semState = ensureSemester(sem);
+
+        elPanel.innerHTML = `
+                <h2>${escapeHtml(sem)}</h2>
+                <div class="row">
+                    <label class="row" style="gap: 6px;">
+                        <input type="checkbox" id="includeSemester" ${semState.include ? "checked" : ""}>
+                        <span>Include this semester in timetable generation</span>
+                    </label>
+                </div>
+                <div class="mini" style="margin-top: 6px;">Each semester tab maintains independent configuration.</div>
+
+                <div style="margin-top: 12px; font-weight: 600;">Core subjects</div>
+                ${renderTableHtml("coreSubjects", semState.coreSubjects, {
+                  col1Label: "Course name",
+                  col1Placeholder: "e.g., Data Structures",
+                  col2Label: "Faculty name",
+                })}
+
+                <div style="margin-top: 12px; font-weight: 600;">Labs</div>
+                ${renderTableHtml("labs", semState.labs, {
+                  col1Label: "Lab name",
+                  col1Placeholder: "e.g., DBMS Lab",
+                  col2Label: "Faculty name",
+                })}
+
+                <!-- Electives removed from semester panel (handled manually later) -->
+            `;
+
+        // wire include checkbox
+        const includeEl = document.getElementById("includeSemester");
+        includeEl.addEventListener("change", () => {
+          semState.include = includeEl.checked;
+        });
+
+        // wire add row buttons (core + labs only)
+        for (const sectionKey of ["coreSubjects", "labs"]) {
+          const addBtn = document.getElementById(`addRow_${sectionKey}`);
+          addBtn.addEventListener("click", () => {
+            addRow(sem, sectionKey);
+          });
+        }
+      }
+
+      function renderTableHtml(sectionKey, rows, labels) {
+        const header1 = labels.col1Label;
+        const header2 = labels.col2Label;
+        const placeholder1 = labels.col1Placeholder || "";
+        const creditOptions = `
+                <option value="3">3</option>
+                <option value="4">4</option>
+            `;
+
+        const bodyRows = rows
+          .map((row) => {
+            const name = escapeHtml(row.name || "");
+            const faculty = escapeHtml(row.faculty || "");
+            const credits = String(row.credits || "3");
+            const recourse = !!row.recourse;
+            return `
+                <tr data-row-id="${row.id}" data-section="${sectionKey}">
+                  <td><input type="text" data-field="name" placeholder="${escapeHtml(placeholder1)}" value="${name}"></td>
+                  <td><input type="text" data-field="faculty" placeholder="e.g., Dr. Rao" value="${faculty}"></td>
+                  <td style="width: 90px;">
+                    <select data-field="credits">
+                      <option value="3" ${credits === "3" ? "selected" : ""}>3</option>
+                      <option value="4" ${credits === "4" ? "selected" : ""}>4</option>
+                    </select>
+                  </td>
+                  <td style="width: 130px;">
+                    <label class="inline">
+                      <input type="checkbox" data-field="recourse" ${recourse ? "checked" : ""}>
+                      <span class="mini">Allowed</span>
+                    </label>
+                  </td>
+                  <td style="width: 90px;">
+                    <button type="button" class="danger" data-action="removeRow">Remove</button>
+                  </td>
+                </tr>
+              `;
+          })
+          .join("");
+
+        return `
+                <table aria-label="${escapeHtml(sectionKey)}">
+                    <thead>
+                        <tr>
+                          <th>${escapeHtml(header1)}</th>
+                          <th>${escapeHtml(header2)}</th>
+                          <th>Credits</th>
+                          <th>Recourse</th>
+                          <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_${sectionKey}">
+                        ${bodyRows || ""}
+                    </tbody>
+                </table>
+                <div class="table-actions">
+                    <button type="button" id="addRow_${sectionKey}">Add row</button>
+                    <div class="mini">Rows are per-semester only.</div>
+                </div>
+            `;
+      }
+
+      function addRow(semesterName, sectionKey) {
+        const semState = ensureSemester(semesterName);
+        const list = semState[sectionKey];
+        const newRow = {
+          id: nextRowId(),
+          name: "",
+          faculty: "",
+          credits: 3,
+          recourse: false,
+        };
+        list.push(newRow);
+
+        const namePlaceholderBySection = {
+          coreSubjects: "e.g., Data Structures",
+          labs: "e.g., DBMS Lab",
+        };
+        const namePlaceholder = namePlaceholderBySection[sectionKey] || "";
+
+        // Add to DOM without rerendering entire panel
+        const tbody = document.getElementById(`tbody_${sectionKey}`);
+        if (!tbody) {
+          renderActiveSemesterPanel();
+          return;
+        }
+
+        const tmp = document.createElement("tbody");
+        tmp.innerHTML = `
+                <tr data-row-id="${newRow.id}" data-section="${sectionKey}">
+                    <td><input type="text" data-field="name" placeholder="${escapeHtml(namePlaceholder)}" value=""></td>
+                    <td><input type="text" data-field="faculty" placeholder="e.g., Dr. Rao" value=""></td>
+                    <td style="width: 90px;">
+                        <select data-field="credits">
+                            <option value="3" selected>3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </td>
+                    <td style="width: 130px;">
+                        <label class="inline">
+                            <input type="checkbox" data-field="recourse">
+                            <span class="mini">Allowed</span>
+                        </label>
+                    </td>
+                    <td style="width: 90px;">
+                        <button type="button" class="danger" data-action="removeRow">Remove</button>
+                    </td>
+                </tr>
+            `;
+        tbody.appendChild(tmp.firstElementChild);
+
+        // No elective matrix updates (electives disabled)
+      }
+
+      function findRow(semesterName, sectionKey, rowId) {
+        const semState = ensureSemester(semesterName);
+        const list = semState[sectionKey];
+        const idNum = Number(rowId);
+        return list.find((r) => r.id === idNum) || null;
+      }
+
+      function onPanelInput(event) {
+        const target = event.target;
+        if (!target) return;
+
+        const tr = target.closest("tr[data-row-id]");
+        if (!tr) return;
+
+        const sectionKey = tr.dataset.section;
+        const rowId = tr.dataset.rowId;
+        const field = target.dataset.field;
+        if (!sectionKey || !rowId || !field) return;
+
+        const row = findRow(appState.activeSemester, sectionKey, rowId);
+        if (!row) return;
+
+        if (field === "recourse") {
+          row.recourse = !!target.checked;
+        } else if (field === "credits") {
+          row.credits = Number(target.value) || 3;
+        } else if (field === "name") {
+          row.name = target.value;
+        } else if (field === "faculty") {
+          row.faculty = target.value;
+        }
+
+        // Elective matrix updates removed (electives disabled)
+      }
+
+      function onPanelClick(event) {
+        const btn = event.target && event.target.closest("button");
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        if (action !== "removeRow") return;
+
+        const tr = btn.closest("tr[data-row-id]");
+        if (!tr) return;
+
+        const sectionKey = tr.dataset.section;
+        const rowId = Number(tr.dataset.rowId);
+        const semState = ensureSemester(appState.activeSemester);
+        const list = semState[sectionKey];
+        const idx = list.findIndex((r) => r.id === rowId);
+        if (idx >= 0) list.splice(idx, 1);
+        tr.remove();
+
+        // Elective matrix updates removed (electives disabled)
+      }
+
+      // ---- Teacher availability ----
+      function renderTeacherAvailability() {
+        const teachers = Object.values(
+          appState.teacherAvailability.teachers,
+        ).sort((a, b) => a.name.localeCompare(b.name));
+
+        elTeacherList.innerHTML = "";
+        if (teachers.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "mini";
+          empty.textContent = "No teacher unavailability added yet.";
+          elTeacherList.appendChild(empty);
+          return;
+        }
+
+        for (const t of teachers) {
+          const box = document.createElement("div");
+          box.className = "teacher";
+          box.dataset.teacherKey = t.key;
+
+          const title = document.createElement("div");
+          title.className = "name";
+          title.textContent = t.name;
+          box.appendChild(title);
+
+          const chips = document.createElement("div");
+          chips.className = "chips";
+          const slots = Array.from(t.slots).sort();
+          if (slots.length === 0) {
+            const none = document.createElement("div");
+            none.className = "mini";
+            none.textContent = "No unavailable slots.";
+            box.appendChild(none);
+          } else {
+            for (const s of slots) {
+              const [day, slot] = s.split("|");
+              const chip = document.createElement("span");
+              chip.className = "chip";
+              chip.textContent = `${day} ${slot}`;
+
+              const x = document.createElement("button");
+              x.type = "button";
+              x.textContent = "×";
+              x.title = "Remove";
+              x.addEventListener("click", () => {
+                removeTeacherSlot(t.key, s);
+              });
+              chip.appendChild(x);
+              chips.appendChild(chip);
+            }
+            box.appendChild(chips);
+          }
+
+          elTeacherList.appendChild(box);
+        }
+      }
+
+      function removeTeacherSlot(teacherKey, slotKey) {
+        const t = appState.teacherAvailability.teachers[teacherKey];
+        if (!t) return;
+        t.slots.delete(slotKey);
+        if (t.slots.size === 0) {
+          // Keep UI clean: remove teacher entry when empty
+          delete appState.teacherAvailability.teachers[teacherKey];
+        }
+        renderTeacherAvailability();
+      }
+
+      function addTeacherSlot(teacherName, day, slot) {
+        const cleanName = String(teacherName || "")
+          .trim()
+          .replace(/\s+/g, " ");
+        if (!cleanName) {
+          showTeacherError("Teacher name is required.");
+          return;
+        }
+        clearTeacherError();
+
+        const key = normalizeKey(cleanName);
+        if (!key) {
+          showTeacherError("Teacher name is invalid.");
+          return;
+        }
+
+        if (!appState.teacherAvailability.teachers[key]) {
+          appState.teacherAvailability.teachers[key] = {
+            key,
+            name: cleanName,
+            slots: new Set(),
+          };
+        }
+
+        const slotKey = `${day}|${slot}`;
+        appState.teacherAvailability.teachers[key].slots.add(slotKey);
+        renderTeacherAvailability();
+      }
+
+      // Elective compatibility UI removed — electives are disabled in this simplified workflow.
+
+      // ---- Generate timetable ----
+      function serializeStateForBackend() {
+        const teacherAvailability = { teachers: {} };
+        for (const [k, t] of Object.entries(
+          appState.teacherAvailability.teachers || {},
+        )) {
+          teacherAvailability.teachers[k] = {
+            key: t.key,
+            name: t.name,
+            slots: Array.from(t.slots || []),
+          };
+        }
+
+        return {
+          cycle: appState.cycle,
+          semesterData: appState.semesterData,
+          teacherAvailability,
+        };
+      }
+
+      function formatCell(assn) {
+        if (!assn) return "";
+        // If an array of assignments, render stacked entries
+        if (Array.isArray(assn)) {
+          return assn.map((a) => formatCell(a)).join("\n---\n");
+        }
+
+        const name = assn.name || "";
+        const faculty = assn.faculty || "";
+        const type = assn.item_type || assn.itemType || "";
+        const sems = Array.isArray(assn.semesters) ? assn.semesters : [];
+        const combined =
+          type === "elective" && sems.length > 1 ? ` [${sems.join(", ")}]` : "";
+        return `${name}${combined}\n(${faculty})`;
+      }
+
+      function renderGridTable(title, grid) {
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const hr = document.createElement("tr");
+        hr.innerHTML =
+          `<th style="width: 110px;">${escapeHtml(title)}</th>` +
+          ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"]
+            .map((p) => `<th>${p}</th>`)
+            .join("");
+        thead.appendChild(hr);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        for (let d = 0; d < 5; d++) {
+          const tr = document.createElement("tr");
+          const cells = grid && grid[d] ? grid[d] : [];
+          let html = `<td><strong>${days[d]}</strong></td>`;
+          for (let p = 0; p < 8; p++) {
+            let cell = cells[p];
+            // Normalize cell to an array of assignments:
+            // - if undefined/null -> []
+            // - if Array -> keep
+            // - if single object -> wrap
+            if (!cell) {
+              cell = [];
+            } else if (!Array.isArray(cell)) {
+              cell = [cell];
+            }
+
+            let inner = "";
+            if (cell.length > 0) {
+              inner = cell
+                .map((a) => {
+                  const type = a.item_type || a.itemType || "";
+                  const eventId = a.event_id || "";
+                  const semLabel = Array.isArray(a.semesters)
+                    ? a.semesters.join(", ")
+                    : "";
+
+                  // Check for slot classification based on event_id
+                  const isElectiveAvailable = eventId.startsWith(
+                    "elective_available:",
+                  );
+                  const isRecourseBlocked =
+                    eventId.startsWith("recourse_blocked:");
+                  const isWindow = type === "window" || type === "WINDOW";
+
+                  let cls = "entry core";
+                  if (isWindow) {
+                    if (isElectiveAvailable) {
+                      cls = "entry elective-available"; // Visual only, no text
+                    } else if (isRecourseBlocked) {
+                      cls = "entry recourse-blocked"; // Subtle gray
+                    } else {
+                      cls = "entry empty";
+                    }
+                  } else if (type === "lab") {
+                    cls = "entry lab";
+                  } else if (type === "elective") {
+                    cls = "entry elective";
+                  }
+
+                  // For elective-available and recourse-blocked, render empty div (visual only)
+                  if (isElectiveAvailable || isRecourseBlocked) {
+                    return `<div class="${cls}"></div>`;
+                  }
+
+                  // For occupied slots, show course info
+                  const title = `${a.name}${type === "elective" && semLabel ? " — " + semLabel : ""}`;
+                  return (
+                    `<div class="${cls}" title="${escapeHtml(title)}">` +
+                    `<div style="font-weight:600;">${escapeHtml(a.name || "")}</div>` +
+                    (a.faculty
+                      ? `<div class="mini">${escapeHtml(a.faculty)}` +
+                        (semLabel ? ` • ${escapeHtml(semLabel)}` : "") +
+                        `</div>`
+                      : "") +
+                    `</div>`
+                  );
+                })
+                .join("");
+            }
+            // Empty cells - no placeholder text
+            const cellHtml = inner && inner.length ? inner : "";
+            html += `<td style="white-space: normal;">${cellHtml}</td>`;
+          }
+          tr.innerHTML = html;
+          tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        return table;
+      }
+
+      // Render per-day tables with semester rows (semester label shown on every row)
+      function renderPerSemesterTables(semTts, semKeys) {
+        const container = document.createElement("div");
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+        for (let d = 0; d < 5; d++) {
+          const dayHeader = document.createElement("div");
+          dayHeader.style.marginTop = "12px";
+          dayHeader.innerHTML = `<strong>${days[d]}</strong>`;
+          container.appendChild(dayHeader);
+
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const hr = document.createElement("tr");
+          hr.innerHTML =
+            `<th style="width: 140px;">Semester</th>` +
+            ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"]
+              .map((p) => `<th>${p}</th>`)
+              .join("");
+          thead.appendChild(hr);
+          table.appendChild(thead);
+
+          const tbody = document.createElement("tbody");
+          for (const sem of semKeys) {
+            const tr = document.createElement("tr");
+            let html = `<td><strong>${escapeHtml(sem)}</strong></td>`;
+            const grid = semTts[sem] || [];
+            const row = grid[d] || [];
+            for (let p = 0; p < 8; p++) {
+              let cell = row[p];
+              if (!cell) cell = [];
+              else if (!Array.isArray(cell)) cell = [cell];
+
+              let inner = "";
+              if (cell.length > 0) {
+                inner = cell
+                  .map((a) => {
+                    const type = a.item_type || a.itemType || "";
+                    const eventId = a.event_id || "";
+
+                    // Check for slot classification based on event_id
+                    const isElectiveAvailable = eventId.startsWith(
+                      "elective_available:",
+                    );
+                    const isRecourseBlocked =
+                      eventId.startsWith("recourse_blocked:");
+                    const isWindow = type === "window" || type === "WINDOW";
+
+                    let cls = "entry core";
+                    if (isWindow) {
+                      if (isElectiveAvailable) {
+                        cls = "entry elective-available";
+                      } else if (isRecourseBlocked) {
+                        cls = "entry recourse-blocked";
+                      } else {
+                        cls = "entry empty";
+                      }
+                    } else if (type === "lab") {
+                      cls = "entry lab";
+                    }
+
+                    // For elective-available and recourse-blocked, render empty div (visual only)
+                    if (isElectiveAvailable || isRecourseBlocked) {
+                      return `<div class="${cls}"></div>`;
+                    }
+
+                    // For occupied slots, show course info
+                    return (
+                      `<div class="${cls}">` +
+                      `<div style="font-weight:600;">${escapeHtml(a.name || "")}</div>` +
+                      (a.faculty
+                        ? `<div class="mini">${escapeHtml(a.faculty)}</div>`
+                        : "") +
+                      `</div>`
+                    );
+                  })
+                  .join("");
+              }
+              // Empty cells - no placeholder text
+              const cellHtml = inner && inner.length ? inner : "";
+              html += `<td style="white-space: normal;">${cellHtml}</td>`;
+            }
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+          }
+
+          table.appendChild(tbody);
+          container.appendChild(table);
+        }
+
+        return container;
+      }
+
+      function renderResults(result) {
+        // Store for export
+        window.lastGeneratedResult = result;
+
+        elResultsPanel.classList.remove("hidden");
+
+        console.log("EngineResult:", result);
+
+        // Render per-day per-semester tables so each row shows its semester label.
+        elSemesterResults.innerHTML = "";
+        const semTts =
+          result.semester_timetables || result.semesterTimetables || {};
+        const semKeys = Object.keys(semTts).sort();
+        if (semKeys.length === 0) {
+          // fallback to combined timetable if no per-semester tables available
+          const combined =
+            result.combined_timetable || result.combinedTimetable || null;
+          if (!combined) {
+            elSemesterResults.innerHTML =
+              '<div class="mini">No timetable returned.</div>';
+          } else {
+            const wrap = document.createElement("div");
+            wrap.style.marginTop = "10px";
+            wrap.appendChild(renderGridTable("Combined Timetable", combined));
+            elSemesterResults.appendChild(wrap);
+          }
+        } else {
+          const wrap = document.createElement("div");
+          wrap.style.marginTop = "10px";
+          wrap.appendChild(renderPerSemesterTables(semTts, semKeys));
+          elSemesterResults.appendChild(wrap);
+        }
+
+        // Debug info: counts and engine debug messages
+        try {
+          const dbg = document.getElementById("debugInfo");
+          const lines = [];
+          let renderedEntries = 0;
+          let emptyCells = 0;
+          let groupedElectives = 0;
+          if (finalCombined) {
+            for (let d = 0; d < 5; d++) {
+              for (let p = 0; p < 8; p++) {
+                const cell = finalCombined[d][p] || [];
+                if (!cell || cell.length === 0) emptyCells += 1;
+                else {
+                  renderedEntries += cell.length;
+                  // Elective type checks removed - ELECTIVE item type no longer exists
+                  const nonWindowCount = cell.filter(
+                    (a) => (a.item_type || a.itemType) !== "window",
+                  ).length;
+                  if (nonWindowCount > 0) renderedEntries += nonWindowCount;
+                }
+              }
+            }
+          }
+
+          lines.push(`Rendered entries: ${renderedEntries}`);
+          lines.push(`Empty cells: ${emptyCells}`);
+          lines.push(`Grouped elective cells: ${groupedElectives}`);
+          if (result.debug && result.debug.length) {
+            lines.push("Engine debug:");
+            for (const m of result.debug) lines.push(" - " + m);
+          }
+
+          dbg.innerHTML = "<pre>" + lines.join("\n") + "</pre>";
+          console.log("Render stats:", {
+            renderedEntries,
+            emptyCells,
+            groupedElectives,
+            engineDebug: result.debug,
+          });
+        } catch (e) {
+          console.warn("Failed to render debug info", e);
+        }
+
+        // Update debug panel if visible
+        if (!elDebugSection.classList.contains("hidden")) {
+          renderDebugPanel(result);
+        }
+
+        // Shared electives and faculty views removed — combined timetable used.
+      }
+
+      async function generateTimetable() {
+        if (generationInProgress) return;
+        generationInProgress = true;
+        clearGenerateError();
+        elResultsPanel.classList.add("hidden");
+
+        // update UI and show loader
+        const prevGenText = elGenerateBtn.textContent;
+        elGenerateBtn.disabled = true;
+        elGenerateBtn.textContent = "Generating...";
+        showLoader("Generating timetable...", "Scheduling in progress");
+
+        const payload = serializeStateForBackend();
+
+        try {
+          const res = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || "Generation failed");
+          }
+
+          const result = await res.json();
+          if (!result.success) {
+            const errs = result.errors || [];
+            showGenerateError(
+              errs.length ? errs.join(" ") : "Unable to generate timetable.",
+            );
+            return;
+          }
+
+          renderResults(result);
+        } catch (e) {
+          showGenerateError(String(e && e.message ? e.message : e));
+        } finally {
+          // always hide loader and restore UI state
+          hideLoader();
+          elGenerateBtn.disabled = false;
+          elGenerateBtn.textContent = prevGenText;
+          generationInProgress = false;
+        }
+      }
+
+      async function exportTimetable(format) {
+        try {
+          // NEW CORRECT ENDPOINTS
+          const endpoint =
+            format === "pdf" ? "/api/export/pdf" : "/api/export/csv";
+
+          const res = await fetch(endpoint);
+
+          if (!res.ok) {
+            let errorText = "";
+            try {
+              const err = await res.json();
+              errorText = err.detail || res.statusText;
+            } catch {
+              errorText = res.statusText;
+            }
+
+            throw new Error(errorText);
+          }
+
+          const blob = await res.blob();
+
+          // Extract filename from backend header
+          let filename = `timetable.${format}`;
+
+          const disposition = res.headers.get("content-disposition");
+
+          if (disposition) {
+            const match = disposition.match(/filename="?([^"]+)"?/);
+
+            if (match && match[1]) {
+              filename = match[1];
+            }
+          }
+
+          // Download file
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+
+          document.body.appendChild(a);
+          a.click();
+
+          a.remove();
+
+          window.URL.revokeObjectURL(url);
+        } catch (e) {
+          console.error("Export failed:", e);
+          alert(`Failed to export as ${format.toUpperCase()}: ${e.message}`);
+        }
+      }
+      // ---- Configuration Management & Test Cases ----
+
+      // Sample test case data
+      const SAMPLE_TEST_CASES = {
+        realDataset: {
+          name: "Real MCA Dataset",
+          cycle: "odd",
+          semesterData: {
+            "MCA-I": {
+              include: true,
+              coreSubjects: [
+                { id: 1, name: "C", faculty: "NN", credits: 4, recourse: true },
+                {
+                  id: 2,
+                  name: "OTSC",
+                  faculty: "RPL",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 3,
+                  name: "TFCS",
+                  faculty: "SR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 4,
+                  name: "COA",
+                  faculty: "RR",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 5,
+                  name: "DBMS",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 6,
+                  name: "CSWT",
+                  faculty: "ASK",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 7,
+                  name: "DBMS Lab",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 8,
+                  name: "C Lab",
+                  faculty: "NN",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [],
+            },
+            "MCA-III": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 9,
+                  name: "Algo",
+                  faculty: "SBR",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 10,
+                  name: "CN",
+                  faculty: "AP",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 11,
+                  name: "SE",
+                  faculty: "SAM",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 12,
+                  name: "OS",
+                  faculty: "VN",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 14,
+                  name: "Python Lab",
+                  faculty: "SBR",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 15,
+                  name: "SE Lab",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [
+                {
+                  id: 16,
+                  name: "AGA",
+                  faculty: "AKD",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 17,
+                  name: "PR",
+                  faculty: "AG",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 18,
+                  name: "PC",
+                  faculty: "RV",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 19,
+                  name: "PDS",
+                  faculty: "NSR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 20,
+                  name: "PSM",
+                  faculty: "AN",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 21,
+                  name: "ACA",
+                  faculty: "NRR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 22,
+                  name: "DC",
+                  faculty: "SR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 23,
+                  name: "CC",
+                  faculty: "MSR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 24,
+                  name: "ML",
+                  faculty: "LN",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 25,
+                  name: "DL",
+                  faculty: "LBSR",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+            },
+            "MTech-I": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-I": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-III": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-V": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VII": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "MCA-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "MTech-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-IV": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VI": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VIII": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+          },
+          teacherAvailability: {
+            teachers: {
+              ap: { key: "ap", name: "AP", slots: ["Thursday|Full Day"] },
+              nn: { key: "nn", name: "NN", slots: ["Monday|Second Half"] },
+            },
+          },
+        },
+        userConfig6: {
+          name: "User Config (row 6)",
+          cycle: "odd",
+          activeSemester: "MCA-I",
+          semesterData: {
+            "MCA-I": {
+              include: true,
+              coreSubjects: [
+                { id: 1, name: "C", faculty: "NN", credits: 4, recourse: true },
+                {
+                  id: 2,
+                  name: "OTSC",
+                  faculty: "RPL",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 3,
+                  name: "TFCS",
+                  faculty: "SR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 4,
+                  name: "COA",
+                  faculty: "RR",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 5,
+                  name: "DBMS",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 6,
+                  name: "CSWT",
+                  faculty: "ASK",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 7,
+                  name: "DBMS Lab",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 8,
+                  name: "C Lab",
+                  faculty: "NN",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [],
+            },
+            "MCA-III": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 9,
+                  name: "Algo",
+                  faculty: "SBR",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 10,
+                  name: "CN",
+                  faculty: "AP",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 11,
+                  name: "SE",
+                  faculty: "SAM",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 12,
+                  name: "OS",
+                  faculty: "VN",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 14,
+                  name: "Python Lab",
+                  faculty: "SBR",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 15,
+                  name: "SE Lab",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [
+                {
+                  id: 16,
+                  name: "AGA",
+                  faculty: "AKD",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 17,
+                  name: "PR",
+                  faculty: "AG",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 18,
+                  name: "PC",
+                  faculty: "RV",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 19,
+                  name: "PDS",
+                  faculty: "NSR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 20,
+                  name: "PSM",
+                  faculty: "AN",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 21,
+                  name: "ACA",
+                  faculty: "NRR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 22,
+                  name: "DC",
+                  faculty: "SR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 23,
+                  name: "CC",
+                  faculty: "MSR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 24,
+                  name: "ML",
+                  faculty: "LN",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 25,
+                  name: "DL",
+                  faculty: "LBSR",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+            },
+            "MTech-I": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 1,
+                  name: "Java",
+                  faculty: "ASK",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 2,
+                  name: "DS",
+                  faculty: "AKD",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 3,
+                  name: "Algo",
+                  faculty: "VN",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 4,
+                  name: "Java Lab",
+                  faculty: "ASK",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 5,
+                  name: "C Lab",
+                  faculty: "AKD",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [],
+            },
+            "IMTech-I": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-III": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-V": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VII": {
+              include: false,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "MCA-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "MTech-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-IV": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VI": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VIII": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+          },
+          teacherAvailability: {
+            teachers: {
+              ap: { key: "ap", name: "AP", slots: [] },
+              nn: { key: "nn", name: "NN", slots: [] },
+              akd: { key: "akd", name: "AKD", slots: [] },
+            },
+          },
+          _rowId: 6,
+        },
+        userConfig7: {
+          name: "User Config (IMTech Full)",
+          cycle: "odd",
+          activeSemester: "IMTech-III",
+          semesterData: {
+            "MCA-I": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 1,
+                  name: "C",
+                  faculty: "NN",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 2,
+                  name: "OTSC",
+                  faculty: "RPL",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 3,
+                  name: "TFCS",
+                  faculty: "SR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 4,
+                  name: "COA",
+                  faculty: "RR",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 5,
+                  name: "DBMS",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 6,
+                  name: "CSWT",
+                  faculty: "ASK",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 7,
+                  name: "DBMS Lab",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 8,
+                  name: "C Lab",
+                  faculty: "NN",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [],
+            },
+            "MCA-III": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 9,
+                  name: "Algo",
+                  faculty: "SBR",
+                  credits: 3,
+                  recourse: true,
+                },
+                {
+                  id: 10,
+                  name: "CN",
+                  faculty: "AP",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 11,
+                  name: "SE",
+                  faculty: "SAM",
+                  credits: 4,
+                  recourse: true,
+                },
+                {
+                  id: 12,
+                  name: "OS",
+                  faculty: "VN",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+              labs: [
+                {
+                  id: 14,
+                  name: "Python Lab",
+                  faculty: "SBR",
+                  credits: 3,
+                  recourse: false,
+                },
+                {
+                  id: 15,
+                  name: "SE Lab",
+                  faculty: "SAM",
+                  credits: 3,
+                  recourse: false,
+                },
+              ],
+              electives: [
+                {
+                  id: 16,
+                  name: "AGA",
+                  faculty: "AKD",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 17,
+                  name: "PR",
+                  faculty: "AG",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 18,
+                  name: "PC",
+                  faculty: "RV",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 19,
+                  name: "PDS",
+                  faculty: "NSR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 20,
+                  name: "PSM",
+                  faculty: "AN",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 21,
+                  name: "ACA",
+                  faculty: "NRR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 22,
+                  name: "DC",
+                  faculty: "SR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 23,
+                  name: "CC",
+                  faculty: "MSR",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 24,
+                  name: "ML",
+                  faculty: "LN",
+                  credits: 4,
+                  recourse: false,
+                },
+                {
+                  id: 25,
+                  name: "DL",
+                  faculty: "LBSR",
+                  credits: 4,
+                  recourse: false,
+                },
+              ],
+            },
+            "MTech-I": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 1,
+                  name: "Java",
+                  faculty: "ASK",
+                  credits: 4,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 2,
+                  name: "DS",
+                  faculty: "AKD",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 3,
+                  name: "Algo",
+                  faculty: "VN",
+                  credits: 4,
+                  recourse: false,
+                  bucket: null,
+                },
+              ],
+              labs: [
+                {
+                  id: 4,
+                  name: "Java Lab",
+                  faculty: "ASK",
+                  credits: 3,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 5,
+                  name: "C Lab",
+                  faculty: "AKD",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+              ],
+              electives: [],
+            },
+            "IMTech-I": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 8,
+                  name: "English",
+                  faculty: "ABC",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 9,
+                  name: "EM-I",
+                  faculty: "DEF",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 10,
+                  name: "EP-I",
+                  faculty: "GHI",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 11,
+                  name: "PSP",
+                  faculty: "WN",
+                  credits: 3,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 12,
+                  name: "PES",
+                  faculty: "DB",
+                  credits: 4,
+                  recourse: true,
+                  bucket: null,
+                },
+              ],
+              labs: [
+                {
+                  id: 13,
+                  name: "PSP Lab",
+                  faculty: "WN",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 14,
+                  name: "BEL-1",
+                  faculty: "DB",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+              ],
+              electives: [],
+            },
+            "IMTech-III": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 15,
+                  name: "IPH",
+                  faculty: "ABCA",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 16,
+                  name: "IT",
+                  faculty: "RPL",
+                  credits: 3,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 17,
+                  name: "EDC",
+                  faculty: "AS",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 18,
+                  name: "OOP",
+                  faculty: "SKU",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 19,
+                  name: "SD",
+                  faculty: "AN",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 21,
+                  name: "COA",
+                  faculty: "RR",
+                  credits: 4,
+                  recourse: true,
+                  bucket: null,
+                },
+              ],
+              labs: [
+                {
+                  id: 20,
+                  name: "OOP Lab",
+                  faculty: "SKU",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 22,
+                  name: "EDC Lab",
+                  faculty: "AS",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+              ],
+              electives: [],
+            },
+            "IMTech-V": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 23,
+                  name: "AFM",
+                  faculty: "ABCC",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 24,
+                  name: "OS",
+                  faculty: "SR",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 25,
+                  name: "CN",
+                  faculty: "AP",
+                  credits: 4,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 26,
+                  name: "Algorithms",
+                  faculty: "NN",
+                  credits: 4,
+                  recourse: true,
+                  bucket: null,
+                },
+              ],
+              labs: [
+                {
+                  id: 27,
+                  name: "OS Lab",
+                  faculty: "SR",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+                {
+                  id: 28,
+                  name: "CN Lab",
+                  faculty: "AP",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+              ],
+              electives: [],
+            },
+            "IMTech-VII": {
+              include: true,
+              coreSubjects: [
+                {
+                  id: 29,
+                  name: "ML",
+                  faculty: "MS",
+                  credits: 3,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 30,
+                  name: "SPM",
+                  faculty: "ASK",
+                  credits: 3,
+                  recourse: true,
+                  bucket: null,
+                },
+                {
+                  id: 31,
+                  name: "CS",
+                  faculty: "AKD",
+                  credits: 3,
+                  recourse: true,
+                  bucket: null,
+                },
+              ],
+              labs: [
+                {
+                  id: 32,
+                  name: "ML Lab",
+                  faculty: "MS",
+                  credits: 3,
+                  recourse: false,
+                  bucket: null,
+                },
+              ],
+              electives: [],
+            },
+            "MCA-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "MTech-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-II": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-IV": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VI": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+            "IMTech-VIII": {
+              include: true,
+              coreSubjects: [],
+              labs: [],
+              electives: [],
+            },
+          },
+          teacherAvailability: {
+            teachers: {
+              nn: {
+                key: "nn",
+                name: "NN",
+                slots: {},
+              },
+              akd: {
+                key: "akd",
+                name: "AKD",
+                slots: {},
+              },
+              ap: {
+                key: "ap",
+                name: "AP",
+                slots: {},
+              },
+              as: {
+                key: "as",
+                name: "AS",
+                slots: {},
+              },
+            },
+          },
+          _rowId: 33,
+        },
+      };
+
+      // Serialization: capture current UI state
+      function serializeUIState() {
+        const state = JSON.parse(JSON.stringify(appState));
+        // Convert Set to Array for serialization
+        for (const [k, t] of Object.entries(
+          state.teacherAvailability.teachers || {},
+        )) {
+          if (t.slots && t.slots instanceof Set) {
+            t.slots = Array.from(t.slots);
+          } else if (Array.isArray(t.slots)) {
+            // already array
+          }
+        }
+        return state;
+      }
+
+      // Restore UI from serialized state
+      function restoreUIFromState(config) {
+        if (!config) return;
+        appState.cycle = config.cycle || "odd";
+        appState.semesterData = JSON.parse(
+          JSON.stringify(config.semesterData || {}),
+        );
+        // electiveCompatibility removed from UI state (electives disabled)
+
+        // Restore teacher availability
+        appState.teacherAvailability.teachers = {};
+        for (const [k, t] of Object.entries(
+          config.teacherAvailability?.teachers || {},
+        )) {
+          // Handle slots: may be array, object, or undefined
+          let slotsArray = [];
+          if (Array.isArray(t.slots)) {
+            slotsArray = t.slots;
+          } else if (t.slots && typeof t.slots === 'object') {
+            // If it's an object (from older format), convert to array
+            slotsArray = Object.values(t.slots);
+          }
+          
+          appState.teacherAvailability.teachers[k] = {
+            key: t.key,
+            name: t.name,
+            slots: new Set(slotsArray),
+          };
+        }
+
+        // Restore UI
+        for (const radio of document.querySelectorAll('input[name="cycle"]')) {
+          radio.checked = radio.value === appState.cycle;
+        }
+        renderTabs();
+        renderActiveSemesterPanel();
+        renderTeacherAvailability();
+        autoSave();
+      }
+
+      // Auto-save to localStorage
+      function autoSave() {
+        try {
+          const config = serializeUIState();
+          localStorage.setItem("schedulerConfig", JSON.stringify(config));
+        } catch (e) {
+          console.warn("Auto-save failed", e);
+        }
+      }
+
+      // Load from localStorage
+      function loadFromStorage() {
+        try {
+          const stored = localStorage.getItem("schedulerConfig");
+          if (stored) {
+            const config = JSON.parse(stored);
+            restoreUIFromState(config);
+            return true;
+          }
+        } catch (e) {
+          console.warn("Load from storage failed", e);
+        }
+        return false;
+      }
+
+      // Download config as JSON
+      function downloadConfig(config, filename) {
+        const dataStr = JSON.stringify(config, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      // Render debug panel
+      function renderDebugPanel(result) {
+        const dbg = document.getElementById("debugContent");
+        const lines = [];
+        lines.push("=== DEBUG INFO ===");
+        lines.push("Serialized State:");
+        lines.push(JSON.stringify(serializeUIState(), null, 2));
+        lines.push("\n=== Latest Result ===");
+        if (result) {
+          lines.push(`Success: ${result.success}`);
+          lines.push(`Errors: ${(result.errors || []).length}`);
+          if (result.errors && result.errors.length) {
+            for (const e of result.errors) lines.push(` - ${e}`);
+          }
+          if (result.debug && result.debug.length) {
+            lines.push("Engine Debug:");
+            for (const m of result.debug) lines.push(` - ${m}`);
+          }
+        }
+        dbg.textContent = lines.join("\n");
+      }
+
+      // DOM references for config management
+      const elSaveConfigBtn = document.getElementById("saveConfigBtn");
+      const elLoadConfigBtn = document.getElementById("loadConfigBtn");
+      const elResetAllBtn = document.getElementById("resetAllBtn");
+      const elConfigFileInput = document.getElementById("configFileInput");
+      const elShowDebugBtn = document.getElementById("showDebugBtn");
+      const elHideDebugBtn = document.getElementById("hideDebugBtn");
+      const elDebugSection = document.getElementById("debugSection");
+      const elExportTimetableBtn =
+        document.getElementById("exportTimetableBtn");
+      const elExportConfigBtn = document.getElementById("exportConfigBtn");
+
+      // Paste area removed from UI.
+
+      // ---- Init ----
+      function init() {
+        // slot options
+        elSlotSelect.innerHTML = "";
+        for (const s of SLOT_OPTIONS) {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s;
+          elSlotSelect.appendChild(opt);
+        }
+
+        // ensure state exists for all known semesters (both cycles)
+        const all = Array.from(new Set([...ODD_SEMESTERS, ...EVEN_SEMESTERS]));
+        all.forEach(ensureSemester);
+
+        // cycle radios
+        for (const radio of document.querySelectorAll('input[name="cycle"]')) {
+          radio.addEventListener("change", () => {
+            appState.cycle = radio.value;
+            renderTabs();
+            renderActiveSemesterPanel();
+            autoSave();
+          });
+        }
+
+        elGenerateBtn.addEventListener("click", generateTimetable);
+
+        // Export button listeners - only PDF and CSV
+        const elExportPdfBtn = document.getElementById("exportPdfBtn");
+        const elExportCsvBtn = document.getElementById("exportCsvBtn");
+
+        if (elExportPdfBtn) {
+          elExportPdfBtn.addEventListener("click", () =>
+            exportTimetable("pdf"),
+          );
+        }
+        if (elExportCsvBtn) {
+          elExportCsvBtn.addEventListener("click", () =>
+            exportTimetable("csv"),
+          );
+        }
+
+        // semester panel event delegation (attach once)
+        elPanel.addEventListener("input", onPanelInput);
+        elPanel.addEventListener("change", onPanelInput);
+        elPanel.addEventListener("click", onPanelClick);
+
+        elAddUnavailable.addEventListener("click", () => {
+          addTeacherSlot(
+            elTeacherName.value,
+            elDaySelect.value,
+            elSlotSelect.value,
+          );
+          elTeacherName.focus();
+        });
+
+        elTeacherName.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addTeacherSlot(
+              elTeacherName.value,
+              elDaySelect.value,
+              elSlotSelect.value,
+            );
+          }
+        });
+
+        // Configuration management event listeners
+        elSaveConfigBtn.addEventListener("click", () => {
+          const config = serializeUIState();
+          downloadConfig(config, "timetable-config.json");
+        });
+
+        elLoadConfigBtn.addEventListener("click", () => {
+          elConfigFileInput.click();
+        });
+
+        elConfigFileInput.addEventListener("change", (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const config = JSON.parse(ev.target.result);
+              console.log("Loaded config:", config);
+              
+              // Ensure teacherAvailability exists if not present
+              if (!config.teacherAvailability) {
+                config.teacherAvailability = { teachers: {} };
+              }
+              
+              restoreUIFromState(config);
+              console.log("Configuration loaded successfully");
+              console.log("Updated appState:", appState);
+            } catch (err) {
+              console.error("Failed to load configuration:", err);
+              alert("Failed to load configuration: " + err.message);
+            }
+          };
+          reader.onerror = () => {
+            alert("Error reading file: " + reader.error);
+            console.error("FileReader error:", reader.error);
+          };
+          reader.readAsText(file);
+          e.target.value = "";
+        });
+
+        elResetAllBtn.addEventListener("click", () => {
+          if (confirm("Reset all settings? This cannot be undone.")) {
+            localStorage.removeItem("schedulerConfig");
+            appState.semesterData = {};
+            appState.teacherAvailability.teachers = {};
+            // electiveCompatibility removed from UI state
+            appState.cycle = "odd";
+            const all = Array.from(
+              new Set([...ODD_SEMESTERS, ...EVEN_SEMESTERS]),
+            );
+            all.forEach(ensureSemester);
+            document.querySelectorAll('input[name="cycle"]')[0].checked = true;
+            renderTabs();
+            renderActiveSemesterPanel();
+            renderTeacherAvailability();
+            alert("All settings reset.");
+          }
+        });
+
+        elShowDebugBtn.addEventListener("click", () => {
+          elDebugSection.classList.remove("hidden");
+          renderDebugPanel(null);
+        });
+
+        elHideDebugBtn.addEventListener("click", () => {
+          elDebugSection.classList.add("hidden");
+        });
+
+        // Paste area removed from UI; use Save/Load or sample datasets instead.
+
+        // Right-panel wiring: populate dataset selector and hook up buttons
+        try {
+          const selector = document.getElementById("datasetSelector");
+          const loadBtn = document.getElementById("loadDatasetBtn");
+          const saveRight = document.getElementById("saveConfigRight");
+          const loadRight = document.getElementById("loadConfigRight");
+          const resetRightBtn = document.getElementById("resetRight");
+
+          if (selector) {
+            selector.innerHTML = "";
+            for (const k of Object.keys(SAMPLE_TEST_CASES)) {
+              const opt = document.createElement("option");
+              opt.value = k;
+              opt.textContent = SAMPLE_TEST_CASES[k].name || k;
+              selector.appendChild(opt);
+            }
+          }
+
+          if (loadBtn && selector) {
+            loadBtn.addEventListener("click", () => {
+              const key = selector.value;
+              if (!key) return alert("Select a dataset first");
+              const cfg = SAMPLE_TEST_CASES[key];
+              if (!cfg) return alert("Dataset not found");
+              restoreUIFromState(cfg);
+            });
+          }
+
+          if (saveRight) {
+            saveRight.addEventListener("click", () => {
+              const config = serializeUIState();
+              downloadConfig(config, "timetable-config.json");
+            });
+          }
+
+          if (loadRight) {
+            loadRight.addEventListener("click", () =>
+              elConfigFileInput.click(),
+            );
+          }
+
+          if (resetRightBtn) {
+            resetRightBtn.addEventListener("click", () =>
+              elResetAllBtn.click(),
+            );
+          }
+        } catch (e) {
+          console.warn("Right panel init failed", e);
+        }
+        
+        // Toggle config panel visibility
+        const elRightPanel = document.getElementById("rightPanel");
+        const toggleConfigPanelBtn = document.getElementById("toggleConfigPanelBtn");
+        const showConfigBtn = document.getElementById("showConfigBtn");
+        
+        if (toggleConfigPanelBtn && elRightPanel && showConfigBtn) {
+          // Hide panel button (× in top-right of panel)
+          toggleConfigPanelBtn.addEventListener("click", () => {
+            elRightPanel.classList.add("hidden");
+            showConfigBtn.classList.add("visible");
+            toggleConfigPanelBtn.title = "Hide config panel";
+          });
+          
+          // Show panel button (floating ⚙ button)
+          showConfigBtn.addEventListener("click", () => {
+            elRightPanel.classList.remove("hidden");
+            showConfigBtn.classList.remove("visible");
+            toggleConfigPanelBtn.title = "Hide config panel";
+          });
+        }
+
+        // Test case buttons
+        const testCaseButtons = document.querySelectorAll("[data-test-case]");
+        testCaseButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const caseKey = btn.getAttribute("data-test-case");
+            const testCase = SAMPLE_TEST_CASES[caseKey];
+            if (testCase) {
+              restoreUIFromState(testCase);
+            }
+          });
+        });
+
+        // Export buttons
+        elExportTimetableBtn.addEventListener("click", () => {
+          if (!window.lastGeneratedResult) {
+            alert("Generate a timetable first.");
+            return;
+          }
+          const timetable = {
+            generated_at: new Date().toISOString(),
+            semester_timetables: window.lastGeneratedResult.semester_timetables,
+            combined_timetable: window.lastGeneratedResult.combined_timetable,
+          };
+          downloadConfig(timetable, "generated-timetable.json");
+        });
+
+        elExportConfigBtn.addEventListener("click", () => {
+          const fullConfig = serializeUIState();
+          downloadConfig(fullConfig, "full-config.json");
+        });
+
+        renderTabs();
+        renderActiveSemesterPanel();
+        renderTeacherAvailability();
+
+        // Auto-save on input/change and load from storage on init
+        elPanel.addEventListener("input", autoSave);
+        elPanel.addEventListener("change", autoSave);
+        document
+          .getElementById("teacherList")
+          .addEventListener("change", autoSave);
+        for (const radio of document.querySelectorAll('input[name="cycle"]')) {
+          radio.addEventListener("change", autoSave);
+        }
+
+        // Restore from storage
+        loadFromStorage();
+      }
+
+      function cssEscape(value) {
+        // Minimal escape for use in attribute selectors.
+        // Elective keys are lowercased and only include letters/numbers/spaces/|, so this is sufficient.
+        return String(value).replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+      }
+
+      init();
+    </script>
+  </body>
+</html>
